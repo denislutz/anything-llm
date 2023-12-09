@@ -13,14 +13,16 @@ Use the Dockerized version of AnythingLLM for a much faster and complete startup
 `docker pull mintplexlabs/anythingllm:master`
 
 ```shell
-export STORAGE_LOCATION="/var/lib/anythingllm" && \
-mkdir -p $STORAGE_LOCATION && \
-touch "$STORAGE_LOCATION/.env" && \
+export STORAGE_LOCATION="$(pwd)/mounted_local_storage"
+mkdir -p $STORAGE_LOCATION
+touch "$STORAGE_LOCATION/.env"
+
 docker run -d -p 3001:3001 \
 -v ${STORAGE_LOCATION}:/app/server/storage \
 -v ${STORAGE_LOCATION}/.env:/app/server/.env \
 -e STORAGE_DIR="/app/server/storage" \
 mintplexlabs/anythingllm:master
+
 ```
 
 Go to `http://localhost:3001` and you are now using AnythingLLM! All your data and progress will persist between
@@ -32,6 +34,16 @@ container rebuilds or pulls from Docker Hub.
 - `cd docker/`
 - `cp .env.example .env` **you must do this before building**
 - `docker-compose up -d --build` to build the image - this will take a few moments.
+
+### Same as script
+```shell
+git clone git@github.com:Mintplex-Labs/anything-llm.git
+cd anything-llm
+touch server/storage/anythingllm.db
+cd docker/
+cp .env.example .env
+docker-compose up -d --build
+```
 
 Your docker host will show the image as online once the build process is completed. This will build the app to `http://localhost:3001`.
 
@@ -83,5 +95,19 @@ For example, if the docker instance is available on `192.186.1.222` your `VITE_A
 
 ### Still not working?
 [Ask for help on Discord](https://discord.gg/6UyHPeGZAC)
+
+### Wrong image platform?
+
+If you pull our docker image directly on a M1 mac os system you might get this warning.
+```
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+```
+
+### Explanation
+The warning message you're encountering is due to a platform mismatch between the Docker image you're trying to run and the architecture of your Apple M1 Mac. Your M1 Mac uses the ARM architecture (specifically, linux/arm64/v8), while the Docker image you're attempting to run is built for the linux/amd64 platform (which is for x86 architecture)
+
+#### Solutions
+- To resolve this issue on an M1 Mac, you can use Docker Desktop for Mac, which includes support for running x86 containers through emulation. This is facilitated by Docker's integration with Apple's Rosetta 2 technology. Rosetta 2 is designed to enable ARM-based Macs to run applications built for x86 architecture by translating x86 instructions to ARM instructions in real-time
+- Build the docker image directly on your machine as described above in "Build locally from source"
 
 
